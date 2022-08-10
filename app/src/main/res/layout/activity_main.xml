@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tvMyBalance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/my_balance"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMyBalance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvMyBalance" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clSell"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/rvMyBalance"
+        app:layout_constraintStart_toStartOf="@+id/rvMyBalance"
+        app:layout_constraintTop_toBottomOf="@+id/tvCurrencyExchange">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvCurrencyExchange"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/currency_exchange"
+        app:layout_constraintEnd_toEndOf="@+id/rvMyBalance"
+        app:layout_constraintStart_toStartOf="@+id/rvMyBalance"
+        app:layout_constraintTop_toBottomOf="@+id/rvMyBalance" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clReceive"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/clSell"
+        app:layout_constraintStart_toStartOf="@+id/clSell"
+        app:layout_constraintTop_toBottomOf="@+id/clSell">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/submit"
+        app:layout_constraintEnd_toEndOf="@+id/clReceive"
+        app:layout_constraintStart_toStartOf="@+id/clReceive"
+        app:layout_constraintTop_toBottomOf="@+id/clReceive" />
+</androidx.constraintlayout.widget.ConstraintLayout>
