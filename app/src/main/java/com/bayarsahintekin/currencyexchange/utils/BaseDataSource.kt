@@ -1,16 +1,16 @@
-package com.bayarsahintekin.currencyexchange.data.remote
+package com.bayarsahintekin.currencyexchange.utils
+
 import android.util.Log
-import com.bayarsahintekin.bayweather.utils.Resource
 import retrofit2.Response
 
 abstract class BaseDataSource {
     val TAG = "BaseDataSource"
-    protected suspend fun <T> getResult(call: suspend () -> Response<T>): Resource<T> {
+    protected suspend fun <T> getResult(call: suspend () -> Response<T>): CEResource<T> {
         try {
             val response = call()
             if (response.isSuccessful) {
                 val body = response.body()
-                if (body != null) return Resource.success(body)
+                return CEResource.success(body)
             }
             return error(" ${response.code()} ${response.message()}")
         } catch (e: Exception) {
@@ -18,9 +18,9 @@ abstract class BaseDataSource {
         }
     }
 
-    private fun <T> error(message: String): Resource<T> {
+    private fun <T> error(message: String): CEResource<T> {
         Log.e(TAG,message)
-        return Resource.error("Network call has failed for a following reason: $message")
+        return CEResource.error("Network call has failed for a following reason: $message")
     }
 
 }

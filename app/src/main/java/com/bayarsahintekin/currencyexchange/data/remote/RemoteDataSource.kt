@@ -1,12 +1,8 @@
-package com.bayarsahintekin.bayweather.data.remote
+package com.bayarsahintekin.currencyexchange.data.remote
 
-import com.bayarsahintekin.currencyexchange.data.remote.BaseDataSource
-import com.bayarsahintekin.currencyexchange.data.remote.IService
-import javax.inject.Inject
+import com.bayarsahintekin.currencyexchange.utils.BaseDataSource
 
-class RemoteDataSource @Inject constructor(
-    private val productService: IService
-) : BaseDataSource() {
-    suspend fun getWeathersByLocation(lon: Long, lat: Long) =
-        getResult { productService.getWeathersByLocation(lng = lon ,lat = lat) }
+class RemoteDataSource(private val service: IService): BaseDataSource() {
+
+    suspend fun getCurrencies(base: String? = null,symbols: String? = null) = getResult { service.getCurrencies(base,symbols) }
 }

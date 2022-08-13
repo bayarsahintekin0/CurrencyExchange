@@ -3,8 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/bsahi/.gradle/caches/transforms-3/dcf257fd0893c934516ca1bcab1128b2/transformed/appcompat-1.4.2/res/layout/support_simple_spinner_dropdown_item.xml" value="0.32382246376811596" />
         <entry key="..\:/Users/bsahi/AndroidStudioProjects/CurrencyExchange/app/src/main/res/drawable/ic_down.xml" value="0.288" />
+        <entry key="..\:/Users/bsahi/AndroidStudioProjects/CurrencyExchange/app/src/main/res/drawable/ic_down_arrow.xml" value="0.247" />
         <entry key="..\:/Users/bsahi/AndroidStudioProjects/CurrencyExchange/app/src/main/res/drawable/ic_up.xml" value="0.288" />
+        <entry key="..\:/Users/bsahi/AndroidStudioProjects/CurrencyExchange/app/src/main/res/drawable/ic_up_arrow.xml" value="0.247" />
         <entry key="..\:/Users/bsahi/AndroidStudioProjects/CurrencyExchange/app/src/main/res/layout/activity_main.xml" value="0.32382246376811596" />
       </map>
     </option>
