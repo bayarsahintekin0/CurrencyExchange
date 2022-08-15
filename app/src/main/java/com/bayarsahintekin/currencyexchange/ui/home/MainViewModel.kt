@@ -1,4 +1,4 @@
-package com.bayarsahintekin.currencyexchange
+package com.bayarsahintekin.currencyexchange.ui.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

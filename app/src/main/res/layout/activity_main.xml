@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ui.home.MainActivity">
 
     <TextView
         android:id="@+id/tvMyBalance"
@@ -57,25 +57,24 @@
             app:layout_constraintTop_toTopOf="@+id/imageView" />
 
         <Spinner
-            android:id="@+id/spinner"
+            android:id="@+id/spnSell"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/editTextNumberSigned" />
+            app:layout_constraintTop_toTopOf="@+id/etSell" />
 
         <EditText
-            android:id="@+id/editTextNumberSigned"
+            android:id="@+id/etSell"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:ems="10"
             android:gravity="end"
-            android:inputType="numberSigned"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/spinner"
+            app:layout_constraintEnd_toStartOf="@+id/spnSell"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
