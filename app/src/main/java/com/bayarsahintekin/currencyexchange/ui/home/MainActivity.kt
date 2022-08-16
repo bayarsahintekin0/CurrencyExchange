@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
     private val viewModel: MainViewModel by viewModels()
-    private lateinit var receiveArrayAdapter:ArrayAdapter<String>
     private lateinit var currency:Currency
     private lateinit var binding: ActivityMainBinding
     private val firestore :FirebaseFirestore by lazy {   FirebaseFirestore.getInstance() }
@@ -80,23 +79,22 @@ class MainActivity : AppCompatActivity() {
 
 
 
-       /* Fill first data to db
 
-        val initData: Map<String, Any> = Gson().fromJson(
-            "{EUR:1000}", object : TypeToken<HashMap<String?, Double?>?>() {}.getType()
-        )
-        firestore.collection("users").document(uid).set(initData).
+
+    }
+
+    private fun addCurrency(currency: MutableMap<String,Double>,feeCount: Int){
+        val user = Users(feeCount,currency)
+
+        firestore.collection("users").document(uid).set(user).
         addOnSuccessListener {
 
         }.addOnFailureListener {
 
-        } */
-
-
-
-
-
+        }
     }
+
+    data class Users(var freeCount:Int,var currencies:MutableMap<String,Double>)
 
     private fun showSuccessInfoDialog(){
         MaterialAlertDialogBuilder(this)
@@ -148,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                         position: Int,
                         id: Long
                     ) {
-
+                        viewModel.getCurrencies(base = selectedItem.toString())
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -164,7 +162,6 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     val selectedBalance = binding.spnSell.selectedItem.toString()
-                    val selectedBalanceValue = userData?.get(selectedBalance)
 
                     viewModel.getCurrencies(base = selectedBalance)
                     observeCurrenciesLiveData()
