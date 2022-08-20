@@ -27,12 +27,13 @@ class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
     private val viewModel: MainViewModel by viewModels()
-    private lateinit var currency:Currency
+    private lateinit var currency: Currency
     private lateinit var binding: ActivityMainBinding
-    private val firestore :FirebaseFirestore by lazy {   FirebaseFirestore.getInstance() }
+    private val firestore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private var uid = ""
     private lateinit var balanceAdapter: BalanceAdapter
-    private var userData:MutableMap<String,Any>? = mutableMapOf()
+    private var currencyMap: MutableMap<String, Double>? = mutableMapOf()
+    private var feeCountMap: MutableMap<String, Int>? = mutableMapOf()
     private var soldAmount = 0.0
     private var soldCurrency = ""
     private var purchasedAmount = 0.0
@@ -45,76 +46,112 @@ class MainActivity : AppCompatActivity() {
         setTitle(R.string.currency_converter)
 
         balanceAdapter = BalanceAdapter()
-        binding.rvMyBalance.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvMyBalance.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvMyBalance.adapter = balanceAdapter
 
         uid = intent.getStringExtra(UID).toString()
 
         binding.btnSubmit.setOnClickListener {
-            val actualAmount = userData?.get(soldCurrency).toString().toDouble()
 
-            if (binding.etSell.text.toString().toDouble() < actualAmount){
-                val updatedData : MutableMap<String, Any>? = userData
-                if ( actualAmount - soldAmount > 0){
-                    updatedData?.set(soldCurrency, actualAmount - soldAmount)
-                }else{
-                    updatedData?.remove(soldCurrency)
-                }
-                updatedData?.set(purchasedCurrency, purchasedAmount)
-                if (updatedData != null) {
-                    firestore.collection("users").document(uid).set(updatedData).addOnSuccessListener {
-                        getUserCurrencies()
-                        showSuccessInfoDialog()
-                    }.addOnFailureListener {
 
-                    }
+            val actualAmount = currencyMap?.get(soldCurrency).toString().toDouble()
+
+            if (binding.etSell.text.toString().toDouble() < actualAmount) {
+                val updatedCurrencyMap: MutableMap<String, Double> = currencyMap!!
+                if (actualAmount - soldAmount > 0) {
+                    updatedCurrencyMap[soldCurrency] = actualAmount - soldAmount
+                } else {
+                    updatedCurrencyMap.remove(soldCurrency)
                 }
-            }else {
-                Toast.makeText(this,resources.getString(R.string.insufficient_balance),Toast.LENGTH_SHORT).show()
+                updatedCurrencyMap[purchasedCurrency] = purchasedAmount
+
+                val updatedFeeCount = feeCountMap
+                var isFeeFree = false
+
+                isFeeFree = if (!feeCountMap!!.keys.contains(soldCurrency)) {
+                    updatedFeeCount?.set(soldCurrency, 4)
+                    true
+                } else {
+                    if (feeCountMap!![soldCurrency]!! > 0) {
+                        updatedFeeCount?.set(soldCurrency, feeCountMap!![soldCurrency]!! - 1)
+                        true
+                    } else
+                        false
+                }
+
+
+                var feePrice = "0"
+                if (!isFeeFree) {
+                    updatedCurrencyMap[soldCurrency]!! - (updatedCurrencyMap[soldCurrency]!! * 0.07)
+                    feePrice = (updatedCurrencyMap[soldCurrency]!! * 0.07).toString()
+                }
+                updatedFeeCount?.let { it1 -> addCurrency(updatedCurrencyMap, it1,feePrice) }
+
+            } else {
+                Toast.makeText(
+                    this,
+                    resources.getString(R.string.insufficient_balance),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
         }
 
         getUserCurrencies()
-
-
-
+/*
+         val currency = mutableMapOf<String, Double>()
+         currency["EUR"] = 1000.0
+         val feeCount = mutableMapOf<String, Int>()
+         feeCount["EUR"] = 5
+         addCurrency(currency, feeCount) */
 
 
     }
 
-    private fun addCurrency(currency: MutableMap<String,Double>,feeCount: Int){
-        val user = Users(feeCount,currency)
+    private fun addCurrency(
+        currency: MutableMap<String, Double>,
+        feeCount: MutableMap<String, Int>,
+        feePrice: String? = null
+    ) {
+        val user = Users(feeCount, currency)
 
-        firestore.collection("users").document(uid).set(user).
-        addOnSuccessListener {
-
+        firestore.collection("users").document(uid).set(user).addOnSuccessListener {
+            showSuccessInfoDialog(feePrice)
         }.addOnFailureListener {
 
         }
     }
 
-    data class Users(var freeCount:Int,var currencies:MutableMap<String,Double>)
+    data class Users(
+        var feeCount: MutableMap<String, Int>,
+        var currencies: MutableMap<String, Double>
+    )
 
-    private fun showSuccessInfoDialog(){
+    private fun showSuccessInfoDialog(feePrice: String?) {
+        val fee = feePrice ?: "0"
         MaterialAlertDialogBuilder(this)
             .setTitle(resources.getString(R.string.currency_converted))
-            .setMessage(resources.getString(R.string.currency_convert_success,
-                "$soldAmount $soldCurrency","$purchasedAmount $purchasedCurrency",""))
-            .setNeutralButton(resources.getString(R.string.done)){ _, _ ->
-
+            .setMessage(
+                resources.getString(
+                    R.string.currency_convert_success,
+                    "$soldAmount $soldCurrency", "$purchasedAmount $purchasedCurrency", "$fee $soldCurrency"
+                )
+            )
+            .setNeutralButton(resources.getString(R.string.done)) { _, _ ->
+                getUserCurrencies()
             }
             .show()
     }
 
-    private fun observeCurrenciesLiveData(){
+    private fun observeCurrenciesLiveData() {
         viewModel.currencies.observe(this) {
-            when(it.status){
+            when (it.status) {
                 CEResource.Status.LOADING -> {
-                    Log.i(TAG,"loading")
+                    Log.i(TAG, "loading")
                 }
                 CEResource.Status.SUCCESS -> {
-                    if (it.data != null){
+                    if (it.data != null) {
                         currency = it.data
                         fillSpinner(currency)
                     }
@@ -126,16 +163,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getUserCurrencies(){
+    private fun getUserCurrencies() {
         firestore.collection("users").document(uid).get().addOnSuccessListener {
-            this.userData = it.data
+            currencyMap = it.data?.get("currencies") as MutableMap<String, Double>?
+            feeCountMap = it.data?.get("feeCount") as MutableMap<String, Int>?
             val userCurrenciesList: ArrayList<String> = arrayListOf()
-            if (userData?.keys != null && userData != null)
-                userCurrenciesList.addAll(userData!!.keys)
+            if (currencyMap?.keys != null && currencyMap != null)
+                userCurrenciesList.addAll(currencyMap!!.keys)
 
-            balanceAdapter.setData(userData as MutableMap<String, Double>,userCurrenciesList)
+            currencyMap?.let { it1 -> balanceAdapter.setData(it1, userCurrenciesList) }
 
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,userCurrenciesList)
+            val adapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                userCurrenciesList
+            )
             binding.spnSell.apply {
 
                 this.adapter = adapter
@@ -155,7 +197,7 @@ class MainActivity : AppCompatActivity() {
             }
 
 
-            binding.etSell.addTextChangedListener(object :TextWatcher{
+            binding.etSell.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
                 }
@@ -179,11 +221,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun fillSpinner(currency: Currency){
+    private fun fillSpinner(currency: Currency) {
 
-        val keys:ArrayList<String> = arrayListOf()
+        val keys: ArrayList<String> = arrayListOf()
         currency.rates?.keys?.let { keys.addAll(it) }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,keys)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, keys)
         binding.spnReceive.apply {
 
             this.adapter = adapter
@@ -194,7 +236,8 @@ class MainActivity : AppCompatActivity() {
                     position: Int,
                     id: Long
                 ) {
-                    val selectedReceiveValue = currency.rates?.get(selectedItem.toString())!!.toDouble() * binding.etSell.text.toString().toDouble()
+                    val selectedReceiveValue = currency.rates?.get(selectedItem.toString())!!
+                        .toDouble() * binding.etSell.text.toString().toDouble()
                     binding.tvShowReceive.text = selectedReceiveValue.toString()
                     soldAmount = binding.etSell.text.toString().toDouble()
                     soldCurrency = binding.spnSell.selectedItem.toString()
